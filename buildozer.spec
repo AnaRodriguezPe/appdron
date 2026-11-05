@@ -42,7 +42,7 @@ version = 0.1
 
 # (list) Application requirements
 # comma separated e.g. requirements = sqlite3,kivy
-requirements = python3,kivy
+requirements = python3,kivy==2.3.0
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
@@ -108,18 +108,15 @@ fullscreen = 0
 # (list) features (adds uses-feature -tags to manifest)
 #android.features = android.hardware.usb.host
 
-# (int) Target Android API, should be as high as possible.
+# --- Android ---
 android.api = 33
-
-# (int) Minimum API your APK / AAB will support.
 android.minapi = 21
+android.ndk = 25b
+android.accept_sdk_license = True
+android.archs = arm64-v8a, armeabi-v7a
 
-# (int) Android SDK version to use
-android.sdk_version = 33
-
-# (str) Android NDK version to use
-android.ndk_version = 25b
-
+# Versión de python-for-android compatible con NDK 25b
+p4a.branch = v2024.01.21
 
 # (int) Target Android API, should be as high as possible.
 #android.api = 33
@@ -449,7 +446,7 @@ ios.codesign.allowed = false
 log_level = 2
 
 # (int) Display warning if buildozer is run as root (0 = False, 1 = True)
-warn_on_root = 1
+warn_on_root = 0
 
 # (str) Path to build artifact storage, absolute or relative to spec file
 # build_dir = ./.buildozer
