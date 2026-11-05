@@ -9,77 +9,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Copiar repositorio
-      uses: actions/checkout@v4
+      - name: Checkout del código
+        uses: actions/checkout@v4
 
-    - name: Configurar Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.10'
+      - name: Compilar APK usando Buildozer Action
+        uses: kivy/buildozer-action@v1
+        with:
+          filename: buildozer.spec
+          android_debug: true
 
-    - name: Instalar dependencias del sistema y Java
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y \
-            python3-pip \
-            build-essential \
-            git \
-            python3-dev \
-            ffmpeg \
-            libsdl2-dev \
-            libsdl2-image-dev \
-            libsdl2-mixer-dev \
-            libsdl2-ttf-dev \
-            libportmidi-dev \
-            libswscale-dev \
-            libavformat-dev \
-            libavcodec-dev \
-            zlib1g-dev \
-            openjdk-17-jdk \
-            unzip \
-            curl
-
-    - name: Configurar SDK, NDK 25b y Herramientas manualmente
-      run: |
-        # Definir rutas base de Buildozer
-        ANDROID_HOME=$HOME/.buildozer/android/platform/android-sdk
-        PLATFORM_DIR=$HOME/.buildozer/android/platform
-        mkdir -p $ANDROID_HOME
-        mkdir -p $PLATFORM_DIR
-
-        # 1. Instalar commandline-tools de Android (para que sdkmanager esté en la ruta moderna)
-        cd $ANDROID_HOME
-        curl -o commandlinetools.zip https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
-        unzip -q commandlinetools.zip
-        mkdir -p cmdline-tools/latest
-        mv cmdline-tools/bin cmdline-tools/latest/
-        mv cmdline-tools/lib cmdline-tools/latest/
-        rm commandlinetools.zip
-
-        # Exportar PATH temporal para el sdkmanager
-        export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin
-
-        # Aceptar licencias y descargar componentes necesarios de la API 33
-        yes | sdkmanager --licenses || true
-        sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.2"
-
-        # 2. Descargar e instalar explícitamente la NDK 25b (evita que intente bajar la 28c)
-        cd $PLATFORM_DIR
-        curl -o android-ndk-r25b-linux.zip https://dl.google.com/android/repository/android-ndk-r25b-linux.zip
-        unzip -q android-ndk-r25b-linux.zip
-        rm android-ndk-r25b-linux.zip
-
-    - name: Instalar Buildozer y Cython
-      run: |
-        pip install --upgrade pip
-        pip install --upgrade cython==0.29.33 buildozer
-
-    - name: Construir APK con Buildozer
-      run: |
-        buildozer -v android debug
-
-    - name: Subir APK generado
-      uses: actions/upload-artifact@v4
-      with:
-        name: app-debug-apk
-        path: bin/*.apk
+      - name: Subir APK generado
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-debug-apk
+          path: bin/*.apk
