@@ -38,12 +38,21 @@ jobs:
             openjdk-17-jdk \
             unzip
 
-    - name: Forzar aceptación de licencias e instalar Build-Tools estables
+    - name: Instalar SDK de Android y Commandline Tools
       run: |
         export ANDROID_HOME=$HOME/.buildozer/android/platform/android-sdk
-        mkdir -p $ANDROID_HOME/cmdline-tools
-        # Forzar la creación de la estructura para que sdkmanager funcione si es llamado por buildozer
-        yes | sdkmanager --licenses || true
+        mkdir -p $ANDROID_HOME
+        cd $ANDROID_HOME
+        curl -o commandlinetools.zip https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
+        unzip -q commandlinetools.zip
+        mkdir -p cmdline-tools/latest
+        mv cmdline-tools/bin cmdline-tools/latest/
+        mv cmdline-tools/lib cmdline-tools/latest/
+        rm commandlinetools.zip
+
+        # Aceptar licencias automáticamente
+        yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
+        $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.2"
 
     - name: Instalar Buildozer y Cython
       run: |
