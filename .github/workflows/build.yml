@@ -7,16 +7,18 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    # Usamos el contenedor oficial de Kivy para compilar de forma limpia
+    container:
+      image: kivy/build:latest
 
     steps:
       - name: Checkout del código
         uses: actions/checkout@v4
 
-      - name: Compilar APK usando Buildozer Action
-        uses: kivy/buildozer-action@v1
-        with:
-          filename: buildozer.spec
-          android_debug: true
+      - name: Compilar APK con Buildozer
+        run: |
+          # Asegurar permisos y compilar en modo debug
+          buildozer -v android debug
 
       - name: Subir APK generado
         uses: actions/upload-artifact@v4
