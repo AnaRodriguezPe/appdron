@@ -38,10 +38,11 @@ jobs:
             openjdk-17-jdk \
             unzip
 
-    - name: Aceptar licencias y configurar SDK de Android
+    - name: Forzar aceptación de licencias e instalar Build-Tools estables
       run: |
-        mkdir -p $HOME/.android
-        echo "### License accepted through CI" > $HOME/.android/repositories.cfg
+        export ANDROID_HOME=$HOME/.buildozer/android/platform/android-sdk
+        mkdir -p $ANDROID_HOME/cmdline-tools
+        # Forzar la creación de la estructura para que sdkmanager funcione si es llamado por buildozer
         yes | sdkmanager --licenses || true
 
     - name: Instalar Buildozer y Cython
