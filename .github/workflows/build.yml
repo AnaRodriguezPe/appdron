@@ -38,6 +38,12 @@ jobs:
             openjdk-17-jdk \
             unzip
 
+    - name: Aceptar licencias y configurar SDK de Android
+      run: |
+        mkdir -p $HOME/.android
+        echo "### License accepted through CI" > $HOME/.android/repositories.cfg
+        yes | sdkmanager --licenses || true
+
     - name: Instalar Buildozer y Cython
       run: |
         pip install --upgrade pip
