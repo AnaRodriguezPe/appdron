@@ -35,7 +35,8 @@ jobs:
             libavformat-dev \
             libavcodec-dev \
             zlib1g-dev \
-            openjdk-17-jdk
+            openjdk-17-jdk \
+            unzip
 
     - name: Instalar Buildozer y Cython
       run: |
@@ -43,9 +44,6 @@ jobs:
         pip install --upgrade cython==0.29.33 buildozer
 
     - name: Construir APK con Buildozer
-      env:
-        # Esto evita que Buildozer falle pidiendo confirmación interactiva de licencias
-        BUILDYZER_ACCEPT_LICENSES: 1
       run: |
         buildozer -v android debug
 
