@@ -17,7 +17,7 @@ jobs:
       with:
         python-version: '3.10'
 
-    - name: Instalar dependencias del sistema
+    - name: Instalar dependencias del sistema y Java
       run: |
         sudo apt-get update
         sudo apt-get install -y \
@@ -43,6 +43,9 @@ jobs:
         pip install --upgrade cython==0.29.33 buildozer
 
     - name: Construir APK con Buildozer
+      env:
+        # Esto evita que Buildozer falle pidiendo confirmación interactiva de licencias
+        BUILDYZER_ACCEPT_LICENSES: 1
       run: |
         buildozer -v android debug
 
