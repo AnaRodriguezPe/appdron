@@ -17,7 +17,7 @@ jobs:
       with:
         python-version: '3.10'
 
-    - name: Instalar dependencias del sistema y Android AIDL
+    - name: Instalar dependencias del sistema
       run: |
         sudo apt-get update
         sudo apt-get install -y \
@@ -35,14 +35,7 @@ jobs:
             libavformat-dev \
             libavcodec-dev \
             zlib1g-dev \
-            openjdk-17-jdk \
-            android-sdk \
-            libtarget-api-java
-
-    - name: Aceptar licencias del SDK de Android e instalar Build-Tools (AIDL)
-      run: |
-        yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
-        $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "build-tools;33.0.2" "platforms;android-33"
+            openjdk-17-jdk
 
     - name: Instalar Buildozer y Cython
       run: |
