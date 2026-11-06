@@ -26,15 +26,22 @@ class Test(Label):
         self.activo = False
         t0 = self.raw[0][0]
         pts = [(x, z) for t, x, z in self.raw if t - t0 >= 1.0]
-
-        n=len(pts)
+        n = len(pts)
+        
+        # Obtenemos el DPI de forma segura (por defecto 96 si no lo detecta)
+        dpi = Metrics.dpi if Metrics.dpi > 0 else 96
+        
         if n < 10:
-            self.text = f"Solo {n} muestras: el ruido es menor a 1 px\nUsa r = 0.0254 / dpi\nToca para repetir"
+            # Aquí calculamos r directamente usando el tamaño de 1 píxel
+            r = 0.0254 / dpi
+            self.text = f"Ruido menor a 1 px\nr = {r:.6f} m\nToca para repetir"
+            print(f"r = {r:.6f} m (por 1 píxel)")
             return
+            
         mx = sum(p[0] for p in pts) / n
         mz = sum(p[1] for p in pts) / n
         var = sum((x - mx)**2 + (z - mz)**2 for x, z in pts) / (2 * (n - 1))
-        dpi = Metrics.dpi if Metrics.dpi > 0 else 96
+        
         r = var**0.5 / dpi * 0.0254          # px -> metros
         self.text = f"r = {r:.6f} m\n({n} muestras)\nToca para repetir"
         print(f"r = {r:.6f} m")
