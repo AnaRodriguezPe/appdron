@@ -5,7 +5,6 @@ import time
 import json
 import threading
 import socket
-from tkinter.ttk import Button
 from kivy.app import App
 from kivy.graphics import Color, Line, Rectangle, InstructionGroup
 from kivy.metrics import Metrics
