@@ -26,6 +26,8 @@ class Test(Label):
         self.activo = False
         t0 = self.raw[0][0]
         pts = [(x, z) for t, x, z in self.raw if t - t0 >= 1.0]
+
+        n=len(pts)
         if n < 10:
             self.text = f"Solo {n} muestras: el ruido es menor a 1 px\nUsa r = 0.0254 / dpi\nToca para repetir"
             return
