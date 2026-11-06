@@ -42,7 +42,22 @@ jobs:
           key: buildozer-${{ hashFiles('buildozer.spec') }}
 
       - name: Compilar APK
-        run: buildozer -v android debug
+        run: |
+          set -o pipefail
+          buildozer -v android debug 2>&1 | tee build.log
+
+      - name: Mostrar el error
+        if: failure()
+        run: |
+          n=$(grep -n "Command failed" build.log | head -1 | cut -d: -f1)
+          sed -n "$((n-60)),$((n-1))p" build.log
+
+      - name: Guardar log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log
+          path: build.log
 
       - name: Subir APK
         uses: actions/upload-artifact@v4
