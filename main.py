@@ -82,7 +82,7 @@ class AreaDibujo(RelativeLayout):
             content=layout,
             size_hint=(0.8, 0.35),
             auto_dismiss=False,
-            pos_hint={'center_x': 0.5, 'top': 0.85}
+            pos_hint={'center_x': 0.5, 'top': 0.8}
         )
 
         def guardar_y_cerrar(btn):
@@ -248,5 +248,5 @@ class AppDron(App):
 
 
 if __name__ == "__main__":
-    Window.softinput_mode = 'pan'
+    Window.softinput_mode = 'resize'
     AppDron().run()
