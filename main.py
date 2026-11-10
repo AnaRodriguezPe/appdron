@@ -59,7 +59,8 @@ class AreaDibujo(RelativeLayout):
             text=HOST,
             multiline=False,
             font_size=18,
-            size_hint=(1, 0.4)
+            size_hint=(1, 0.5),
+            input_type='number'
         )
         layout.add_widget(self.input_ip)
         
@@ -69,14 +70,20 @@ class AreaDibujo(RelativeLayout):
         self.popup = Popup(
             title="Write the IP",
             content=layout,
-            size_hint=(0.8, 0.4)
+            size_hint=(0.8, 0.35),
+            auto_dismiss=False
         )
 
         def guardar_y_cerrar(btn):
             global HOST
-            HOST = self.input_ip.text.strip()
-            print(f"New IP: {HOST}")
-            self.popup.dismiss()
+            ip_ingresada = self.input_ip.text.strip()
+
+            if ip_ingresada:
+                HOST = ip_ingresada
+                print(f"New IP: {HOST}")
+                self.popup.dismiss()
+            else:
+                print(f"Wrong IP")
 
         btn_ok.bind(on_press=guardar_y_cerrar)
         self.popup.open()
