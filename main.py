@@ -62,13 +62,20 @@ class AreaDibujo(RelativeLayout):
             size_hint=(1, 0.5),
             input_type='number'
         )
+        
+        # Función para cambiar automáticamente comas por puntos si el teclado lo hace
+        def on_text_change(instance, value):
+            if ',' in value:
+                instance.text = value.replace(',', '.')
+
+        self.input_ip.bind(text=on_text_change)
         layout.add_widget(self.input_ip)
         
-        btn_ok = Button(text='ok', size_hint=(1, 0.4))
+        btn_ok = Button(text='ok', size_hint=(1, 0.4), bold=True)
         layout.add_widget(btn_ok)
 
         self.popup = Popup(
-            title="Write the IP",
+            title="Write valid IP (X.X.X.X)",
             content=layout,
             size_hint=(0.8, 0.35),
             auto_dismiss=False
@@ -77,13 +84,24 @@ class AreaDibujo(RelativeLayout):
         def guardar_y_cerrar(btn):
             global HOST
             ip_ingresada = self.input_ip.text.strip()
-
-            if ip_ingresada:
-                HOST = ip_ingresada
-                print(f"New IP: {HOST}")
-                self.popup.dismiss()
-            else:
-                print(f"Wrong IP")
+            
+            # Expresión regular para validar estrictamente el formato 0.0.0.0 (hasta 3 dígitos por bloque)
+            import re
+            patron_ip = r"^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$"
+            match = re.match(patron_ip, ip_ingresada)
+            
+            if match:
+                # Verificamos adicionalmente que cada número esté entre 0 y 255
+                octetos = [int(g) for g in match.groups()]
+                if all(0 <= o <= 255 for o in octetos):
+                    HOST = ip_ingresada
+                    print(f"New IP validada: {HOST}")
+                    self.popup.dismiss()
+                    return
+            
+            # Si no pasa la validación
+            print("IP inválida. Debe ser formato X.X.X.X (ej. 192.168.1.10)")
+            self.input_ip.text = HOST # Restaura la anterior si falla
 
         btn_ok.bind(on_press=guardar_y_cerrar)
         self.popup.open()
