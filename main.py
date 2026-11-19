@@ -36,8 +36,8 @@ class AreaDibujo(RelativeLayout):
         self.canvas.before.add(self.fondo)
  
         # etiquetas de los ejes 
-        self.lbl_x = Label(text='X', color=(0.9, 0.9, 0.9, 1), size_hint=(None, None), size=(0, 0), bold=True, font_size="28sp")
-        self.lbl_z = Label(text='Z', color=(0.9, 0.9, 0.9, 1), size_hint=(None, None), size=(0, 0), bold=True, font_size="28sp")
+        self.lbl_x = Label(text='X', color=(0.9, 0.9, 0.9, 1), size_hint=(None, None), size=(0, 0), bold=True, font_size="20sp")
+        self.lbl_z = Label(text='Z', color=(0.9, 0.9, 0.9, 1), size_hint=(None, None), size=(0, 0), bold=True, font_size="20sp")
         self.add_widget(self.lbl_x)
         self.add_widget(self.lbl_z)
  
@@ -197,11 +197,16 @@ class AreaDibujo(RelativeLayout):
         self.fondo.add(Color(0, 0, 0, 0))  # negro
         self.fondo.add(Rectangle(pos=(0, 0), size=self.size))
 
+        # que cada cuadrito sea 1cm**2
+        dpi = Metrics.dpi if Metrics.dpi > 0 else 96
+        px_cm=dpi/2.54
+        paso_cm=max(1, int(round(px_cm)))
+
         # rayitas de guia de dibujo
         self.fondo.add(Color(0.5, 0.5, 0.25, 1))  # como verde
-        for gx in range(int(self.m_izq), int(self.m_izq + self.ancho_util), 40):
+        for gx in range(int(self.m_izq), int(self.m_izq + self.ancho_util)+ 1, paso_cm):
             self.fondo.add(Line(points=[gx, self.m_abajo, gx, self.m_abajo + self.alto_util], width=1))
-        for gz in range(int(self.m_abajo), int(self.m_abajo + self.alto_util), 40):
+        for gz in range(int(self.m_abajo), int(self.m_abajo + self.alto_util)+ 1, paso_cm):
             self.fondo.add(Line(points=[self.m_izq, gz, self.m_izq + self.ancho_util, gz], width=1))
 
         # marco exterior
@@ -229,7 +234,7 @@ class AppDron(App):
         top_layout.add_widget(label_info)
         top_layout.add_widget(btn_config)
 
-        btn_send = Button(text="Send", size_hint_y=0.1, font_size="18sp", bold=True)
+        btn_send = Button(text="Send", size_hint_y=0.2, font_size="18sp", bold=True)
         btn_send.bind(on_press=area_dibujo.guardar)
  
         layout.add_widget(top_layout)
