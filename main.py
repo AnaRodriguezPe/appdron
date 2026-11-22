@@ -149,70 +149,56 @@ class AreaDibujo(RelativeLayout):
         except Exception as e:
             print(f"Error: {e}")
     
-    
-    def gethost(self, instance):
-        layout = BoxLayout(
-            orientation='vertical',
-            padding=10,
-            spacing=10
-        )
+    def gethost(self, instance): # para poder cambiar la ip
+        layout = BoxLayout(orientation='vertical', padding=10, spacing=10)
 
-        self.input_ip = TextInput(
+        self.input_ip = TextInput( # campo de texto para la ip
             text=HOST,
             multiline=False,
             font_size=18,
             size_hint=(1, 0.5),
-            input_type='text'
+            input_type='number'
         )
 
+        def on_text_change(instance, value): # reemplaza las comas por puntos
+            if ',' in value:
+                instance.text = value.replace(',', '.')
+
+        self.input_ip.bind(text=on_text_change)
         layout.add_widget(self.input_ip)
-
-        mensaje = Label(
-            text="Introduce la IP del ordenador",
-            size_hint=(1, 0.5)
-        )
-        layout.add_widget(mensaje)
-
-        btn_ok = Button(
-            text='OK',
-            size_hint=(1, 0.8),
-            bold=True
-        )
+        
+        btn_ok = Button(text='ok', size_hint=(1, 0.8), bold=True)
         layout.add_widget(btn_ok)
 
-        self.popup = Popup(
+        self.popup = Popup( # hace que aparezca el popup
             title="Write valid IP (X.X.X.X)",
             content=layout,
-            size_hint=(0.8, 0.4),
+            size_hint=(0.8, 0.35),
             auto_dismiss=False,
             pos_hint={'center_x': 0.5, 'top': 0.8}
         )
 
-        def guardar_y_cerrar(btn):
+        def guardar_y_cerrar(btn): # valida que la ip sea real
             global HOST
-
             ip_ingresada = self.input_ip.text.strip()
+            
+            import re
+            patron_ip = r"^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$"
+            match = re.match(patron_ip, ip_ingresada)
+            
+            if match: # si la ip es correcta se guarda en HOST
+                octetos = [int(g) for g in match.groups()]
+                if all(0 <= o <= 255 for o in octetos):
+                    HOST = ip_ingresada
+                    print(f"New IP validada: {HOST}")
+                    self.popup.dismiss() # cierra el popup
+                    return
 
-            import ipaddress
-
-            try:
-                ipaddress.IPv4Address(ip_ingresada)
-
-                HOST = ip_ingresada
-
-                print(f"New IP validada: {HOST}")
-
-                mensaje.text = f"IP guardada: {HOST}"
-
-                self.popup.dismiss()
-
-            except ipaddress.AddressValueError:
-                mensaje.text = "IP invalida. Ejemplo: 192.168.1.105"
-                print("IP invalida")
+            print("invalid IP")
+            self.input_ip.text = HOST # si falla se queda la ip anterior
 
         btn_ok.bind(on_press=guardar_y_cerrar)
-        self.popup.open()
-
+        self.popup.open() # abre el popup
 
     def update_canvas(self, *args): # actualiza el canvas de tamaño
         self.ancho_util = self.width - self.m_izq - 10 # calcula el espacio util restando los margenes
