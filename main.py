@@ -20,6 +20,21 @@ HOST = "127.0.0.1"
 PORT = 65432
 GUARDAR_LOCAL = False
 
+from kivy.base import EventLoop
+from kivy.config import Config
+from kivy.core.window import Window
+
+print("=== WINDOW PROVIDER ===")
+print(Window.__class__.__module__, Window.__class__.__name__)
+
+print("=== INPUT PROVIDERS (Config) ===")
+for k, v in Config.items("input"):
+    print(f"  {k} = {v}")
+
+print("=== ACTIVE INPUT PROVIDERS (EventLoop) ===")
+for p in EventLoop.input_providers:
+    print(" ", p.__class__.__module__, p.__class__.__name__, "->", getattr(p, "device", ""))
+
 class AreaDibujo(RelativeLayout):
 
     def __init__(self, label_info, **kwargs):
@@ -134,56 +149,70 @@ class AreaDibujo(RelativeLayout):
         except Exception as e:
             print(f"Error: {e}")
     
-    def gethost(self, instance): # para poder cambiar la ip
-        layout = BoxLayout(orientation='vertical', padding=10, spacing=10)
+    
+    def gethost(self, instance):
+        layout = BoxLayout(
+            orientation='vertical',
+            padding=10,
+            spacing=10
+        )
 
-        self.input_ip = TextInput( # campo de texto para la ip
+        self.input_ip = TextInput(
             text=HOST,
             multiline=False,
             font_size=18,
             size_hint=(1, 0.5),
-            input_type='number'
+            input_type='text'
         )
 
-        def on_text_change(instance, value): # reemplaza las comas por puntos
-            if ',' in value:
-                instance.text = value.replace(',', '.')
-
-        self.input_ip.bind(text=on_text_change)
         layout.add_widget(self.input_ip)
-        
-        btn_ok = Button(text='ok', size_hint=(1, 0.8), bold=True)
+
+        mensaje = Label(
+            text="Introduce la IP del ordenador",
+            size_hint=(1, 0.5)
+        )
+        layout.add_widget(mensaje)
+
+        btn_ok = Button(
+            text='OK',
+            size_hint=(1, 0.8),
+            bold=True
+        )
         layout.add_widget(btn_ok)
 
-        self.popup = Popup( # hace que aparezca el popup
+        self.popup = Popup(
             title="Write valid IP (X.X.X.X)",
             content=layout,
-            size_hint=(0.8, 0.35),
+            size_hint=(0.8, 0.4),
             auto_dismiss=False,
             pos_hint={'center_x': 0.5, 'top': 0.8}
         )
 
-        def guardar_y_cerrar(btn): # valida que la ip sea real
+        def guardar_y_cerrar(btn):
             global HOST
-            ip_ingresada = self.input_ip.text.strip()
-            
-            import re
-            patron_ip = r"^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$"
-            match = re.match(patron_ip, ip_ingresada)
-            
-            if match: # si la ip es correcta se guarda en HOST
-                octetos = [int(g) for g in match.groups()]
-                if all(0 <= o <= 255 for o in octetos):
-                    HOST = ip_ingresada
-                    print(f"New IP validada: {HOST}")
-                    self.popup.dismiss() # cierra el popup
-                    return
 
-            print("invalid IP")
-            self.input_ip.text = HOST # si falla se queda la ip anterior
+            ip_ingresada = self.input_ip.text.strip()
+
+            import ipaddress
+
+            try:
+                ipaddress.IPv4Address(ip_ingresada)
+
+                HOST = ip_ingresada
+
+                print(f"New IP validada: {HOST}")
+
+                mensaje.text = f"IP guardada: {HOST}"
+
+                self.popup.dismiss()
+
+            except ipaddress.AddressValueError:
+                mensaje.text = "IP invalida. Ejemplo: 192.168.1.105"
+                print("IP invalida")
 
         btn_ok.bind(on_press=guardar_y_cerrar)
-        self.popup.open() # abre el popup
+        self.popup.open()
+
 
     def update_canvas(self, *args): # actualiza el canvas de tamaño
         self.ancho_util = self.width - self.m_izq - 10 # calcula el espacio util restando los margenes
@@ -197,16 +226,11 @@ class AreaDibujo(RelativeLayout):
         self.fondo.add(Color(0, 0, 0, 0))  # negro
         self.fondo.add(Rectangle(pos=(0, 0), size=self.size))
 
-        # que cada cuadrito sea 1cm**2
-        dpi = Metrics.dpi if Metrics.dpi > 0 else 96
-        px_cm=dpi/2.54
-        paso_cm=max(1, int(round(px_cm)))
-
         # rayitas de guia de dibujo
         self.fondo.add(Color(0.5, 0.5, 0.25, 1))  # como verde
-        for gx in range(int(self.m_izq), int(self.m_izq + self.ancho_util)+ 1, paso_cm):
+        for gx in range(int(self.m_izq), int(self.m_izq + self.ancho_util), 50):
             self.fondo.add(Line(points=[gx, self.m_abajo, gx, self.m_abajo + self.alto_util], width=1))
-        for gz in range(int(self.m_abajo), int(self.m_abajo + self.alto_util)+ 1, paso_cm):
+        for gz in range(int(self.m_abajo), int(self.m_abajo + self.alto_util), 50):
             self.fondo.add(Line(points=[self.m_izq, gz, self.m_izq + self.ancho_util, gz], width=1))
 
         # marco exterior
@@ -216,7 +240,6 @@ class AreaDibujo(RelativeLayout):
         # etiquetas X y Z
         self.lbl_x.pos = (self.m_izq + self.ancho_util - 10, self.m_abajo - 30)
         self.lbl_z.pos = (self.m_izq - 30, self.m_abajo + self.alto_util - 10)
-
 
 class AppDron(App):
 
@@ -234,7 +257,7 @@ class AppDron(App):
         top_layout.add_widget(label_info)
         top_layout.add_widget(btn_config)
 
-        btn_send = Button(text="Send", size_hint_y=0.2, font_size="18sp", bold=True)
+        btn_send = Button(text="Send", size_hint_y=0.1, font_size="18sp", bold=True)
         btn_send.bind(on_press=area_dibujo.guardar)
  
         layout.add_widget(top_layout)
